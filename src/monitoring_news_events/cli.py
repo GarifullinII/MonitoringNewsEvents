@@ -7,6 +7,10 @@ from .config import load_project_config
 from .pipeline import MonitoringPipeline
 
 
+def _print_progress(message: str) -> None:
+    print(f"[news-monitor] {message}", flush=True)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="news-monitor",
@@ -49,7 +53,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "run":
-        artifact = pipeline.run(args.geo, notify=args.notify, force_disable_llm=args.disable_llm)
+        artifact = pipeline.run(
+            args.geo,
+            notify=args.notify,
+            force_disable_llm=args.disable_llm,
+            progress_callback=_print_progress,
+        )
         print(f"GEO: {artifact.report.geo_name}")
         print(f"Signals: {len(artifact.report.raw_signals)}")
         print(f"Ideas: {len(artifact.report.angles)}")
@@ -64,7 +73,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "run-all":
         for geo in config.geos:
-            artifact = pipeline.run(geo.id, notify=args.notify, force_disable_llm=args.disable_llm)
+            artifact = pipeline.run(
+                geo.id,
+                notify=args.notify,
+                force_disable_llm=args.disable_llm,
+                progress_callback=_print_progress,
+            )
             destination = artifact.airtable_report_url or str(artifact.markdown_path)
             print(f"{geo.id}\t{destination}")
         return 0

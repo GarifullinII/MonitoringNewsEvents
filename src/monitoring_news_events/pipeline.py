@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Callable
 
 from .airtable import AirtablePublisher
 from .heuristics import (
@@ -40,14 +41,29 @@ class MonitoringPipeline:
         self.llm_client = OpenAIResponsesClient(config.llm)
         self.notifier = NotificationHub()
 
-    def run(self, geo_id: str, notify: bool = False, force_disable_llm: bool = False) -> PipelineArtifacts:
+    def run(
+        self,
+        geo_id: str,
+        notify: bool = False,
+        force_disable_llm: bool = False,
+        progress_callback: Callable[[str], None] | None = None,
+    ) -> PipelineArtifacts:
+        def progress(message: str) -> None:
+            if progress_callback is not None:
+                progress_callback(message)
+
         geo = self.config.require_geo(geo_id)
+        progress(f"Starting report generation for GEO '{geo.id}' ({geo.name})")
+        progress("Fetching articles from configured sources")
         articles = fetch_geo_articles(geo)
+        progress(f"Fetched {len(articles)} article candidates")
+        progress("Building raw signals, angles, headlines, recommendations, and risks")
         raw_signals = build_raw_signals(articles, geo)
         notes: list[str] = []
         if not raw_signals:
             raw_signals = build_evergreen_signals(geo)
             notes.append("Свежих новостей оказалось мало, поэтому выпуск дополнен evergreen-темами.")
+            progress("No fresh signals found, fallback to evergreen themes")
 
         feedback_entries = self.store.load_feedback(geo.id)
         feedback_summary = summarize_feedback(feedback_entries)
@@ -62,6 +78,7 @@ class MonitoringPipeline:
         llm_is_enabled_for_geo = (geo.llm_enabled if geo.llm_enabled is not None else self.config.llm.enabled) and not force_disable_llm
         if llm_is_enabled_for_geo and self.llm_client.is_enabled():
             try:
+                progress("Running LLM enrichment")
                 enriched = self.llm_client.enrich_report(geo, raw_signals, feedback_entries)
                 angles = self._map_angles(enriched.get("angles", []), raw_signals) or angles
                 headlines = self._map_headlines(enriched.get("headlines", []), angles) or headlines
@@ -71,8 +88,10 @@ class MonitoringPipeline:
                 urgency_hot = urgency.get("hot", urgency_hot)
                 urgency_later = urgency.get("later", urgency_later)
                 llm_used = True
+                progress("LLM enrichment completed")
             except Exception as exc:
                 notes.append(f"LLM enrichment skipped: {exc}")
+                progress(f"LLM enrichment skipped: {exc}")
 
         generated_at = now_utc()
         coverage_start = generated_at.date().isoformat()
@@ -108,11 +127,13 @@ class MonitoringPipeline:
             },
         )
 
+        progress("Saving local markdown and JSON artifacts")
         artifact_paths = self.store.persist_report(report)
         airtable_report_id = ""
         airtable_report_url = ""
         if self.airtable.is_enabled():
             try:
+                progress("Publishing report structure to Airtable")
                 airtable_result = self.airtable.publish(report, artifact_paths)
                 airtable_report_id = airtable_result.report_record_id
                 airtable_report_url = airtable_result.report_url
@@ -121,15 +142,20 @@ class MonitoringPipeline:
                 report.metadata["airtable_report_id"] = airtable_report_id
                 report.metadata["airtable_report_url"] = airtable_report_url
                 artifact_paths = self.store.persist_report(report, append_knowledge_base=False)
+                progress("Airtable publish completed")
             except Exception as exc:
                 report.notes.append(f"Airtable publish skipped: {exc}")
                 artifact_paths = self.store.persist_report(report, append_knowledge_base=False)
+                progress(f"Airtable publish skipped: {exc}")
 
         notifications = (
             self.notifier.send(geo, report, artifact_paths, report_url=airtable_report_url)
             if notify
             else []
         )
+        if notify:
+            progress(f"Notifications sent: {', '.join(notifications) if notifications else 'none'}")
+        progress("Report generation completed")
         return PipelineArtifacts(
             report=report,
             markdown_path=artifact_paths["markdown"],
