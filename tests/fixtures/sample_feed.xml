@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Demo LATAM Feed</title>
+    <item>
+      <title>Chile banks face backlash after new account maintenance fees</title>
+      <link>https://example.com/chile-banks-fees</link>
+      <description>Consumers are complaining that new maintenance fees are quietly reducing disposable income and forcing families to rethink monthly budgets.</description>
+      <pubDate>Wed, 27 May 2026 09:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Viral TikTok challenge in Chile shows how families cut grocery spending</title>
+      <link>https://example.com/chile-grocery-tiktok</link>
+      <description>The trend spread quickly on social media after users posted side-by-side receipts showing how inflation changed weekly shopping habits.</description>
+      <pubDate>Tue, 26 May 2026 15:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Tax reform debate reignites fears over take-home pay in Chile</title>
+      <link>https://example.com/chile-tax-reform</link>
+      <description>Workers and small business owners say they are worried that any new tax burden will immediately hit salaries and cash flow.</description>
+      <pubDate>Mon, 25 May 2026 12:10:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Local celebrity death sparks discussion about debt and family security</title>
+      <link>https://example.com/chile-celebrity-death</link>
+      <description>Public reaction shifted from grief to conversations about how quickly families can face financial vulnerability after an unexpected loss.</description>
+      <pubDate>Sun, 24 May 2026 18:20:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Corruption probe into regional housing fund triggers anger over lost savings</title>
+      <link>https://example.com/chile-housing-probe</link>
+      <description>The scandal revived fears that ordinary people keep paying while institutions mishandle money intended to support households.</description>
+      <pubDate>Fri, 22 May 2026 08:45:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

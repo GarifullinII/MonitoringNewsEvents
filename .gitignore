@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Local/private config variants
+configs/*.local.toml
+configs/*.private.toml
+
+# Runtime data and generated reports
+outputs/
+data/knowledge_base/
+data/feedback/*.json
+!data/feedback/*.example.json
+data/raw/
+data/tmp/
+
+# Logs and local databases
+*.log
+*.sqlite3
+*.db
+
+# OS / editor files
+.DS_Store
+.idea/
+.vscode/

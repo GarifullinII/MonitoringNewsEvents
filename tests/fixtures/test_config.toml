@@ -1,0 +1,33 @@
+[project]
+report_dir = "../../outputs"
+data_dir = "../../data"
+coverage_days = 7
+signal_limit = 10
+idea_limit = 20
+headlines_per_idea = 3
+
+[llm]
+enabled = false
+
+[[geo]]
+id = "fixture-geo"
+name = "Chile"
+owner = "Fixture Owner"
+offer_name = "Финансовый оффер"
+offer_description = "Тестовый оффер про защиту бюджета."
+audience_pains = [
+  "страх, что денег не хватит до конца месяца",
+  "недоверие к банкам и комиссиям"
+]
+offer_hooks = [
+  "защита бюджета",
+  "поиск запасного дохода"
+]
+
+  [[geo.source]]
+  kind = "local_rss"
+  name = "Fixture feed"
+  source_type = "локальный таблоид"
+  category = "экономика"
+  path = "sample_feed.xml"
+  max_items = 10
